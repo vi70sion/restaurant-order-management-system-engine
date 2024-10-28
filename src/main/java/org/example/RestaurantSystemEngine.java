@@ -1,16 +1,22 @@
 package org.example;
 
+import org.example.service.CheckOrdersIsNotDelayed;
 import org.example.service.OrderService;
-import org.example.service.RabbitMQService;
 
 public class RestaurantSystemEngine {
     public static void main(String[] args) throws Exception {
 
-        RabbitMQService rabbitMQService =new RabbitMQService();
-        OrderService orderService = new OrderService();
+        OrderService orderService = new OrderService("orders_queue");
+        Thread orderServiceThread = new Thread(orderService);
+        orderServiceThread.start();
 
-        orderService.readQueue(rabbitMQService);
+        OrderService paymentService = new OrderService("payment_queue");
+        Thread paymentServiceThread = new Thread(paymentService);
+        paymentServiceThread.start();
 
+        CheckOrdersIsNotDelayed checkOrdersIsNotDelayed = new CheckOrdersIsNotDelayed();
+        Thread checkOrdersIsNotDelayedThread = new Thread(checkOrdersIsNotDelayed);
+        checkOrdersIsNotDelayedThread.start();
 
     }
 }

@@ -1,18 +1,11 @@
 package org.example.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.client.*;
 import com.mongodb.client.model.Filters;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.example.model.Order;
-
-import javax.print.DocFlavor;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,7 +54,9 @@ public class MongoDBService {
                 .append("dishes", order.getDishes())
                 .append("status", order.getStatus())
                 .append("orderTime", order.getOrderTime())
-                .append("completeTime", order.getCompleteTime());
+                .append("completeTime", order.getCompleteTime())
+                .append("amount", order.getAmount())
+                .append("paymentMethod", order.getPaymentMethod());
     }
 
     private Document orderWithIDToDocument(Order order) {
@@ -71,14 +66,16 @@ public class MongoDBService {
                 .append("dishes", order.getDishes())
                 .append("status", order.getStatus())
                 .append("orderTime", order.getOrderTime())
-                .append("completeTime", order.getCompleteTime());
+                .append("completeTime", order.getCompleteTime())
+                .append("amount", order.getAmount())
+                .append("paymentMethod", order.getPaymentMethod());
     }
 
     public String addOrder(Order order) {
         Document doc = orderToDocument(order);
         collection.insertOne(doc);
         order.setOrderId(doc.getObjectId("_id").toString());  // set generated ID
-        System.out.println("Added person: " + order);
+        System.out.println("Added order: " + order);
         return order.getOrderId();
     }
 
@@ -109,7 +106,7 @@ public class MongoDBService {
     public void updateOrder(String id, Order order) {
         Document updatedDoc = orderToDocument(order);
         collection.updateOne(Filters.eq("_id", new ObjectId(id)), new Document("$set", updatedDoc));
-        System.out.println("Updated person with id: " + id);
+        System.out.println("Updated order with id: " + id);
     }
 
     public void updateOrderStatus(Order order, String status) {
@@ -123,7 +120,7 @@ public class MongoDBService {
 
     public void deleteOrder(String id) {
         collection.deleteOne(Filters.eq("_id", new ObjectId(id)));
-        System.out.println("Deleted person with id: " + id);
+        System.out.println("Deleted order with id: " + id);
     }
 
     public void close() {

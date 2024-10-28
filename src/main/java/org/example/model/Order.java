@@ -1,6 +1,7 @@
 package org.example.model;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -10,14 +11,16 @@ public class Order implements Serializable {
     private String clientName;    // Kliento vardas arba identifikacija
     private int tableNo;     // Staliuko numeris
     private List<String> dishes;  // Užsakytų patiekalų sąrašas
-    private String status;      // Užsakymo būsena ("placed", "completed", "is_late")
+    private String status;      // Užsakymo būsena ("placed", "completed", "is_late", "paid")
     private LocalDateTime orderTime;  // Laikas, kada užsakymas buvo pateiktas
     private LocalDateTime completeTime;
+    private BigDecimal amount;
+    private String paymentMethod;
 
     public Order() {
     }
 
-    public Order(String orderId, String clientName, int tableNo, List<String> dishes, String status, LocalDateTime orderTime, LocalDateTime completeTime) {
+    public Order(String orderId, String clientName, int tableNo, List<String> dishes, String status, LocalDateTime orderTime, LocalDateTime completeTime, BigDecimal amount, String paymentMethod) {
         this.orderId = orderId;
         this.clientName = clientName;
         this.tableNo = tableNo;
@@ -25,6 +28,8 @@ public class Order implements Serializable {
         this.status = status;
         this.orderTime = orderTime;
         this.completeTime = completeTime;
+        this.amount = amount;
+        this.paymentMethod = paymentMethod;
     }
 
     public String getOrderId() {
@@ -81,5 +86,21 @@ public class Order implements Serializable {
 
     public void setCompleteTime(LocalDateTime completeTime) {
         this.completeTime = completeTime;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }
