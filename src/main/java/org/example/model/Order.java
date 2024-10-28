@@ -1,14 +1,16 @@
 package org.example.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class Order {
+public class Order implements Serializable {
+    private static final long serialVersionUID = 1L;  // good practice to use
     private String orderId;  // Unikalus užsakymo ID
     private String clientName;    // Kliento vardas arba identifikacija
     private int tableNo;     // Staliuko numeris
     private List<String> dishes;  // Užsakytų patiekalų sąrašas
-    private String status;      // Užsakymo būsena ("placed", "completed", "laiku neparuoštas")
+    private String status;      // Užsakymo būsena ("placed", "completed", "is_late")
     private LocalDateTime orderTime;  // Laikas, kada užsakymas buvo pateiktas
     private LocalDateTime completeTime;
 

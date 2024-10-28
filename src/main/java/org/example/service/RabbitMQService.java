@@ -4,9 +4,10 @@ package org.example.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.*;
 import org.example.model.Order;
-
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +19,9 @@ public class RabbitMQService {
     private final ObjectMapper objectMapper;
     private Connection connection;
     private Channel channel;
+    private final MongoDBService mongoDBService;
+
+    private final RedisService redisService;
     private long recievedCount = 0;
 
 
@@ -29,6 +33,8 @@ public class RabbitMQService {
         factory.setPassword("guest");
         this.objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
+        this.mongoDBService = new MongoDBService();
+        this.redisService = new RedisService("localhost", 6379);
     }
 
     public void sendObjectToQueue(Object obj) throws Exception {
@@ -60,6 +66,8 @@ public class RabbitMQService {
                 try {
                     Order order = objectMapper.readValue(jsonMessage, Order.class);
                     System.out.println();
+                    order.setOrderId(mongoDBService.addOrder(order));
+                    redisService.putWithExpiration(order.getOrderId(), order, 300);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -69,7 +77,8 @@ public class RabbitMQService {
 
             System.out.println("Laukiama");
             while (true) {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
+                checkOrdersIsNotDelayed();
             }
         }
     }
@@ -138,6 +147,17 @@ public class RabbitMQService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void checkOrdersIsNotDelayed(){
+        List<Order> orders = mongoDBService.getAllOrders();
+        for(Order order : orders) {
+            if((order.getCompleteTime() == null) && (order.getStatus().equals("placed"))) {
+                if(order.getOrderTime().isBefore(LocalDateTime.now().minusMinutes(10))){
+                    mongoDBService.updateOrderStatus(order, "is_late");
+                }
+            }
         }
     }
 
